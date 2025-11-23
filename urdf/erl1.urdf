@@ -22,14 +22,14 @@
     <!-- body -->
     <collision name="collision_chassis">
       <geometry>
-        <box size="0.5 0.3 0.07"/>
+        <mesh filename = "package://erl1/meshes/mogi_bot.dae"/>
       </geometry>
     </collision>
 
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.5 0.3 0.07"/>
+        <mesh filename = "package://erl1/meshes/mogi_bot.dae"/>
       </geometry>
       <material name="blue"/>
     </visual>
@@ -123,66 +123,29 @@
     <dynamics damping="1.0" friction="1.0"/>
   </joint>
 
-<!-- ex1 -->
-<link name="link_cube">
-  <visual name="visual_cube">
-    <origin xyz="0 0 0.05" rpy="0 0 0"/>
-    <geometry>
-      <box size="0.1 0.1 0.1"/>
-    </geometry>
-    <material name="blue"/>
-  </visual>
-  <collision>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <geometry>
-      <box size="0.1 0.1 0.1"/>
-    </geometry>
-  </collision>
-  <inertial>
-    <mass value="0.3"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <inertia
-      ixx="0.000125" ixy="0" ixz="0"
-      iyy="0.0010625" iyz="0" izz="0.0010625"/>
-  </inertial>
-</link>
+  <!-- friction between wheels and ground -->
+  <gazebo reference="left_wheel">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.0001</minDepth>
+    <maxVel>1.0</maxVel>
+  </gazebo>
 
-<joint name="cube_joint" type="revolute">
-  <parent link="link_chassis"/>
-  <child link="link_cube"/>
-  <origin xyz="0 0 0.035" rpy="0 0 0"/>
-  <axis xyz="0 0 1"/>
-  <limit lower="-1.57" upper="1.57" effort="5" velocity="1.0"/>
-</joint>
+  <gazebo reference="right_wheel">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.0001</minDepth>
+    <maxVel>1.0</maxVel>
+  </gazebo>
 
-<link name="link_arm">
-  <visual>
-    <origin xyz="0.5 0 0" rpy="0 0 0"/>
-    <geometry>
-      <box size="1.0 0.05 0.05"/>
-    </geometry>
-    <material name="blue"/>
-  </visual>
-  <collision>
-    <geometry>
-      <box size="1.0 0.05 0.05"/>
-    </geometry>
-  </collision>
-  <inertial>
-    <mass value="1.0"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <inertia
-      ixx="0.0004167" ixy="0" ixz="0"
-      iyy="0.0835417" iyz="0" izz="0.0835417"/>
-  </inertial>
-</link>
+  <gazebo reference="link_chassis">
+    <mu1>0.000002</mu1>
+    <mu2>0.000002</mu2>
+  </gazebo>
 
-<joint name="arm_joint" type="revolute">
-  <parent link="link_cube"/>
-  <child link="link_arm"/>
-  <origin xyz="0 0 0.1" rpy="0 0 0"/>
-  <axis xyz="0 1 0"/>
-  <limit lower="-3.0" upper="-0.1" effort="5" velocity="1.0"/>
-</joint>
 
 </robot>
