@@ -77,122 +77,30 @@
       <pose>0 0 0 0 0 0</pose>
       <self_collide>false</self_collide>
     </model>
-    <model name='cylinder'>
-      <pose>-1.7385772971239408 -0.034160464037469612 0.49999942638036005 3.1907006886453198e-19 -8.7590926843501272e-20 3.7638017968585173e-21</pose>
-      <link name='cylinder_link'>
-        <inertial>
-          <inertia>
-            <ixx>0.14580000000000001</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.14580000000000001</iyy>
-            <iyz>0</iyz>
-            <izz>0.125</izz>
-          </inertia>
-          <mass>1</mass>
-          <pose>0 0 0 0 0 0</pose>
-        </inertial>
-        <collision name='cylinder_collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.5</radius>
-              <length>1</length>
-            </cylinder>
-          </geometry>
-          <surface>
-            <friction>
-              <ode/>
-            </friction>
-            <bounce/>
-            <contact/>
-          </surface>
-        </collision>
-        <visual name='cylinder_visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.5</radius>
-              <length>1</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
-            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
-            <specular>1 1 1 1</specular>
-          </material>
-        </visual>
-        <pose>0 0 0 0 0 0</pose>
-        <enable_wind>false</enable_wind>
-      </link>
-      <static>false</static>
-      <self_collide>false</self_collide>
-    </model>
-    <model name='sphere'>
-      <pose>-3.0639617332963067 -0.25193340749695325 0.499999999902001 0 0 0</pose>
-      <link name='sphere_link'>
-        <inertial>
-          <inertia>
-            <ixx>0.10000000000000001</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.10000000000000001</iyy>
-            <iyz>0</iyz>
-            <izz>0.10000000000000001</izz>
-          </inertia>
-          <mass>1</mass>
-          <pose>0 0 0 0 0 0</pose>
-        </inertial>
-        <collision name='sphere_collision'>
-          <geometry>
-            <sphere>
-              <radius>0.5</radius>
-            </sphere>
-          </geometry>
-          <surface>
-            <friction>
-              <ode/>
-            </friction>
-            <bounce/>
-            <contact/>
-          </surface>
-        </collision>
-        <visual name='sphere_visual'>
-          <geometry>
-            <sphere>
-              <radius>0.5</radius>
-            </sphere>
-          </geometry>
-          <material>
-            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
-            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
-            <specular>1 1 1 1</specular>
-          </material>
-        </visual>
-        <pose>0 0 0 0 0 0</pose>
-        <enable_wind>false</enable_wind>
-      </link>
-      <static>false</static>
-      <self_collide>false</self_collide>
-    </model>
-    <include>
-      <uri>file:///home/obe/gazebo_models/rescue_randy</uri>
-      <name>rescue_randy</name>
-      <pose>-3.1609675977953167 0.45414134889703295 0 0 0 0</pose>
-    </include>
-    <include>
-      <uri>file:///home/obe/gazebo_models/table_marble</uri>
-      <name>table_marble</name>
-      <pose>-3.1262046697015409 -2.0865827083650381 0.64800000000000002 0 0 0</pose>
-    </include>
-    <include>
-      <uri>file:///home/obe/gazebo_models/aws_robomaker_warehouse_ClutteringC_01</uri>
-      <name>aws_robomaker_warehouse_ClutteringC_01</name>
-      <pose>-0.51057858783749221 3.3444064325642557 0 0 0 0</pose>
-    </include>
-    
     <include>
       <uri>file:///home/obe/gazebo_models/aruco_box</uri>
       <name>aruco_box</name>
-      <pose>2.5471217632293701 0.39202201366424561 0.24999999995712521 3.5731803990653256e-18 3.3516680844964549e-18 -3.9963046490489073e-22</pose>
+      <pose>2.5510902870585674 -0.29631083984035822 0.24999958194673308 3.141590998525531 -3.8930981531813808e-13 -3.1379500778123131</pose>
+    </include>
+    <include>
+      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <name>aruco_box_0</name>
+      <pose>0.88209846567909511 0.44909273158362589 0.24999988800065173 0.31363768537990122 1.5707962537944136 0.77353189305266257</pose>
+    </include>
+    <include>
+      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <name>aruco_box_1</name>
+      <pose>0.83557635545730591 2.0431859493255615 0.24999902140451172 -5.629719086594106e-18 4.4534178177335164e-17 -0.388061009191916</pose>
+    </include>
+    <include>
+      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <name>aruco_box_2</name>
+      <pose>2.5537241077409694 3.1884746979150611 0.24999937608785852 1.5707988052943616 -4.3753889400477419e-13 -3.1321432850206068</pose>
+    </include>
+    <include>
+      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <name>aruco_box_3</name>
+      <pose>4.4337043762207031 1.4977600574493408 0.24999999991468014 1.1456595028680099e-17 9.4276376414028504e-18 1.1177042943470204e-20</pose>
     </include>
     <light name='sun' type='directional'>
       <pose>0 0 10 0 0 0</pose>

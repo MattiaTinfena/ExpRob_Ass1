@@ -8,7 +8,7 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Text
 def generate_launch_description():
 
     world_arg = DeclareLaunchArgument(
-        'world', default_value='my_world.sdf',
+        'world', default_value='aruco_boxes.sdf',
         description='Name of the Gazebo world file to load'
     )
 
@@ -16,7 +16,7 @@ def generate_launch_description():
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
     # Add your own gazebo library path here
-    gazebo_models_path = "/home/ubuntu/gazebo_models"
+    gazebo_models_path = "/home/obe/gazebo_models"
     os.environ["GZ_SIM_RESOURCE_PATH"] += os.pathsep + gazebo_models_path
 
 
