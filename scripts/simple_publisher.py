@@ -26,7 +26,7 @@ class RobotControl(Node):
             '/odom',
             self.odometry_callback,
             10)
-        self.timer = self.create_timer(0.1, self.spin_robot)
+        self.timer = self.create_timer(0.01, self.spin_robot)
 
         self.velocity = Twist()
         self.velocity.angular.z = 0.7
