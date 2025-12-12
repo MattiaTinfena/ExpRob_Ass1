@@ -4,13 +4,17 @@ import math
 from rclpy.node import Node
 from aruco_opencv_msgs.msg import ArucoDetection 
 from geometry_msgs.msg import Twist, Point
-from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 from enum import Enum
+from sensor_msgs.msg import CompressedImage
+from cv_bridge import CvBridge
+import cv2
 
 class RobotControl(Node):
     def __init__(self):
         super().__init__('robotControl')
+
+        self.bridge = CvBridge()
 
         self.delta = 0.03
         self.dist_treshold = 0.25
@@ -20,12 +24,15 @@ class RobotControl(Node):
         self.rotation_goal = None
         self.marker_id_goal = None
         self.distance_from_marker = None
+        self.image_published = False
 
         self.robot_state = RobotState.STARTING
         self.markers_detected = dict()
         self.unvisited_markers = []
 
         self.velocity_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.image_publisher = self.create_publisher(CompressedImage, 'camera/image_with_circle', 10)
+
         self.detections_subscriber = self.create_subscription(
             ArucoDetection,
             '/aruco_detections',
@@ -36,7 +43,14 @@ class RobotControl(Node):
             '/odom',
             self.odometry_callback,
             10)
-        
+        self.image_subscriber = self.create_subscription(
+            CompressedImage, 
+            'camera/image/compressed', 
+            self.image_callback, 
+            10)
+
+        cv2.namedWindow("view", cv2.WINDOW_AUTOSIZE)
+
         self.timer = self.create_timer(0.007, self.control_robot)
 
         self.rotating_counterclock_velocity = Twist()
@@ -110,9 +124,16 @@ class RobotControl(Node):
 
             if self.distance_from_marker and abs(self.distance_from_marker) < self.dist_treshold :
                 self.velocity_publisher.publish(self.stop_movement)
-                #TODO: acquire image and publish it
                 self.get_logger().info('marker reached')
-                self.robot_state = RobotState.COMING_BACK
+                self.robot_state = RobotState.ACQUIRE_IMAGE
+
+        elif self.robot_state == RobotState.ACQUIRE_IMAGE:
+            if self.image_published:
+                self.get_logger().info('image published')
+                self.image_published = False  
+                self.robot_state = RobotState.COMING_BACK              
+            else:
+                pass
 
         elif self.robot_state == RobotState.COMING_BACK:
             self.velocity_publisher.publish(self.go_home_velocity)
@@ -122,9 +143,33 @@ class RobotControl(Node):
                 self.robot_state = RobotState.SET_MARKER_GOAL
                 
 
-
-        #self.get_logger().info('Publishing: "%s"' % self.velocity.angular)
         
+        #self.get_logger().info('Publishing: "%s"' % self.velocity.angular)
+
+    def image_callback(self, msg):
+        if self.robot_state == RobotState.ACQUIRE_IMAGE and not self.image_published:
+            try:
+                # Convert ROS Image to OpenCV image
+                cv_image = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
+
+                # Draw a red circle in the center
+                center = (cv_image.shape[1] // 2, cv_image.shape[0] // 2)
+                cv2.circle(cv_image, center, 50, (0, 0, 255), 3)
+
+                # Show the image
+                cv2.imshow("view", cv_image)
+                cv2.waitKey(1)
+
+                # Convert back to ROS Image and publish
+                out_msg = self.bridge.cv2_to_compressed_imgmsg(cv_image, dst_format='jpeg')
+                out_msg.header = msg.header  # preserve original header
+                self.image_publisher.publish(out_msg)
+                self.image_published = True
+
+
+            except Exception as e:
+                self.get_logger().error(f'cv_bridge exception: {e}')
+    
     def detections_callback(self, msg):
         if len(msg.markers) > 0 and self.robot_state == RobotState.SEARCH_FOR_MARKERS:
             for marker in msg.markers:
@@ -152,7 +197,8 @@ class RobotState(Enum):
     SET_MARKER_GOAL = 3
     ROTATE_TO_MARKER = 4
     GO_TO_MARKER = 5
-    COMING_BACK = 6
+    ACQUIRE_IMAGE = 6
+    COMING_BACK = 7
 
 def main(args=None):
     rclpy.init(args=args)
