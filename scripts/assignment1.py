@@ -48,7 +48,7 @@ class RobotControl(Node):
             10)
         self.image_subscriber = self.create_subscription(
             CompressedImage, 
-            'camera/image/compressed', 
+            'camera/rgb/image_raw/compressed', 
             self.image_callback, 
             10)
 
