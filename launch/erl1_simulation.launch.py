@@ -3,14 +3,16 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command, TextSubstitution
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
 
     pkg_erl1 = get_package_share_directory('erl1')
+    pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
+    # Add your own gazebo library path here
     gazebo_models_path, ignore_last_dir = os.path.split(pkg_erl1)
     os.environ["GZ_SIM_RESOURCE_PATH"] += os.pathsep + gazebo_models_path
 
@@ -61,13 +63,18 @@ def generate_launch_description():
         LaunchConfiguration('model')  # Replace with your URDF or Xacro file
     ])
 
-    world_launch = IncludeLaunchDescription(
+    gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(pkg_erl1, 'launch', 'my_launch.py'),
+            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'),
         ),
-        launch_arguments={
-        'world': LaunchConfiguration('world'),
-        }.items()
+        launch_arguments={'gz_args': [PathJoinSubstitution([
+            pkg_erl1,
+            'worlds',
+            LaunchConfiguration('world')
+        ]),
+        #TextSubstitution(text=' -r -v -v1 --render-engine ogre')],
+        TextSubstitution(text=' -r -v -v1')],
+        'on_exit_shutdown': 'true'}.items()
     )
 
     # Launch rviz
@@ -120,7 +127,6 @@ def generate_launch_description():
             "/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model",
             #"/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V",
             #"/camera/image@sensor_msgs/msg/Image@gz.msgs.Image",
-
             "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
             "imu@sensor_msgs/msg/Imu@gz.msgs.IMU",
             "/navsat@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat",
@@ -169,7 +175,7 @@ def generate_launch_description():
     launchDescriptionObject.add_action(y_arg)
     launchDescriptionObject.add_action(yaw_arg)
     launchDescriptionObject.add_action(sim_time_arg)
-    launchDescriptionObject.add_action(world_launch)
+    launchDescriptionObject.add_action(gazebo_launch)
     launchDescriptionObject.add_action(rviz_node)
     launchDescriptionObject.add_action(spawn_urdf_node)
     launchDescriptionObject.add_action(gz_bridge_node)
