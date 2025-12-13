@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 import math
-from rclpy.node import Node
+from rclpy.node import Node 
 from aruco_opencv_msgs.msg import ArucoDetection 
 from geometry_msgs.msg import Twist, Point
 from nav_msgs.msg import Odometry
@@ -48,8 +48,9 @@ class RobotControl(Node):
             'camera/image/compressed', 
             self.image_callback, 
             10)
-
+        
         cv2.namedWindow("view", cv2.WINDOW_AUTOSIZE)
+
 
         self.timer = self.create_timer(0.007, self.control_robot)
 
@@ -68,18 +69,18 @@ class RobotControl(Node):
 
         
     def orientation_goal_reached(self, goal):
-        return (goal  + self.delta) % 6.28 > self.yaw and (goal  - self.delta) % 6.28 < self.yaw
+        return ((goal  + self.delta) % (math.pi * 2)) > self.yaw and ((goal  - self.delta) % (math.pi * 2)) < self.yaw
     
     def control_robot(self):
+        current_yaw = self.yaw
         
         if self.robot_state == RobotState.STARTING:
-
-            if self.yaw is None:
+            if current_yaw is None:
                 return
             
             if self.initial_yaw is None:
-                self.initial_yaw = self.yaw
-                self.get_logger().info('started')
+                self.initial_yaw = current_yaw
+                self.get_logger().info(f'started moving with yaw {current_yaw}')
             
                 self.velocity_publisher.publish(self.rotating_counterclock_velocity)
 
@@ -93,12 +94,15 @@ class RobotControl(Node):
 
                 self.unvisited_markers = list(self.markers_detected.keys())
                 self.unvisited_markers.sort(reverse = True)
+                # self.unvisited_markers.pop()
+                self.get_logger().info(f'markers detected:{len(self.markers_detected)}')
+                for marker_id, marker in self.markers_detected.items():
+                    self.get_logger().info(f'marker id:{marker_id}, error: {marker[1]}, yaw: {marker[0]}')
                 self.robot_state = RobotState.SET_MARKER_GOAL
 
         elif self.robot_state == RobotState.SET_MARKER_GOAL:
             if len(self.unvisited_markers) != 0:
                 self.marker_id_goal = self.unvisited_markers.pop()
-                # self.marker_id_goal = 256
                 self.get_logger().info(f'current marker id goal: {self.marker_id_goal}')
                 self.robot_state = RobotState.ROTATE_TO_MARKER
             else:
@@ -109,12 +113,13 @@ class RobotControl(Node):
             self.rotation_goal = self.markers_detected[self.marker_id_goal][0]   
 
             if not self.orientation_goal_reached(self.rotation_goal):
-                if (self.rotation_goal - self.yaw) % 6.28 > 3.14:
+                if (self.rotation_goal - current_yaw) % (math.pi * 2) > math.pi:
                     self.velocity_publisher.publish(self.rotating_clock_velocity) 
                 else:
                     self.velocity_publisher.publish(self.rotating_counterclock_velocity)
             else:
-                self.get_logger().info('orientation reached')
+                self.get_logger().info(f'orientation reached, with yaw: {current_yaw}')
+
                 self.velocity_publisher.publish(self.stop_movement)
                 self.robot_state = RobotState.GO_TO_MARKER
         
@@ -147,48 +152,105 @@ class RobotControl(Node):
         #self.get_logger().info('Publishing: "%s"' % self.velocity.angular)
 
     def image_callback(self, msg):
-        if self.robot_state == RobotState.ACQUIRE_IMAGE and not self.image_published:
-            try:
-                # Convert ROS Image to OpenCV image
-                cv_image = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        # Convert ROS Image to OpenCV image
+        current_yaw = self.yaw
 
-                # Draw a red circle in the center
-                center = (cv_image.shape[1] // 2, cv_image.shape[0] // 2)
-                cv2.circle(cv_image, center, 50, (0, 0, 255), 3)
+        cv_image = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
-                # Show the image
-                cv2.imshow("view", cv_image)
-                cv2.waitKey(1)
+        if self.robot_state == RobotState.SEARCH_FOR_MARKERS or self.robot_state == RobotState.ACQUIRE_IMAGE:
+        # if True:
+            img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+            aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_ARUCO_ORIGINAL)
+            corners, ids, _ = cv2.aruco.detectMarkers(img_gray, aruco_dict)
+            if ids is not None:            
+                for i in range(len(ids)):
+                    id = ids[i][0]
+                    x_center = 0
+                    y_center = 0
+                    if len(corners[i][0]) != 4:
+                        self.get_logger().error(f"numbers of corners wrong!")
+                        exit()
+                    for corner in corners[i][0]:
+                        x_center += corner[0]
+                        y_center += corner[1]
+                    x_center /= 4.0
+                    y_center /= 4.0
 
-                # Convert back to ROS Image and publish
-                out_msg = self.bridge.cv2_to_compressed_imgmsg(cv_image, dst_format='jpeg')
-                out_msg.header = msg.header  # preserve original header
-                self.image_publisher.publish(out_msg)
-                self.image_published = True
+                    if self.robot_state == RobotState.ACQUIRE_IMAGE and not self.image_published:
+                        
+                        # Draw a red circle in the center
+                        radius = 0
+                        for corner in corners[i][0]:
+                            act_dist = math.dist(corner,[x_center,y_center])
+                            if radius < act_dist:
+                                radius = act_dist
+
+                        cv2.circle(cv_image, (int(x_center), int(y_center)), int(radius), (0, 0, 255), 3)
+                        
+                        cv2.imshow("view", cv_image)
+                        cv2.waitKey(1)    
+                        out_msg = self.bridge.cv2_to_compressed_imgmsg(cv_image, dst_format='jpeg')
+                        out_msg.header = msg.header  # preserve original header
+
+                        self.image_publisher.publish(out_msg)
 
 
-            except Exception as e:
-                self.get_logger().error(f'cv_bridge exception: {e}')
+                        # Convert back to ROS Image and publish
+                        self.image_published = True
+
+                    cv2.circle(cv_image, (int(x_center),240), 6, (255, 0, 0), -1)  # -1 = pieno
+                    x_error = abs(640/2 - x_center)
+                    if id not in self.markers_detected or \
+                        x_error < self.markers_detected[id][1]:
+                        if id in self.markers_detected: 
+                            self.get_logger().info(f'updating yaw for maker {id}, old error: {self.markers_detected[id][1]} \
+                                                old yaw: {self.markers_detected[id][0]} new error: {x_error}, new yaw: {current_yaw}')
+                        self.markers_detected[id] = (current_yaw, x_error)
+            if ids is not None and len(corners) > 0:
+                    for i in range(len(ids)):
+                        pts = corners[i][0]  # (4,2): [top-left, top-right, bottom-right, bottom-left] di solito
+
+                        for j in range(4):
+                            x, y = pts[j]
+                            p = (int(x), int(y))
+                            cv2.circle(cv_image, p, 6, (0, 255, 0), -1)  # -1 = pieno
+
+                        cv2.circle(cv_image, (320,240), 6, (0, 255, 0), -1)  # -1 = pieno
+
+                        cv2.putText(cv_image, f"error={x_error}, yaw={current_yaw}", (20, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                        
+                        cv2.putText(cv_image, f"finalerror={self.markers_detected[id][1]}, finalyaw={self.markers_detected[id][0]}", (20, 40),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+
+            cv2.putText(cv_image, f"a", (1, 1),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            
+            cv2.imshow("view", cv_image)
+            cv2.waitKey(1)    
+            out_msg = self.bridge.cv2_to_compressed_imgmsg(cv_image, dst_format='jpeg')
+            out_msg.header = msg.header  # preserve original header
+
+            self.image_publisher.publish(out_msg)
+
+    
+        
+
+
     
     def detections_callback(self, msg):
-        if len(msg.markers) > 0 and self.robot_state == RobotState.SEARCH_FOR_MARKERS:
-            for marker in msg.markers:
-                if marker.marker_id not in self.markers_detected or \
-                    abs(marker.pose.position.x) < abs(self.markers_detected[marker.marker_id][1].x):
-                    self.markers_detected[marker.marker_id] = (self.yaw,marker.pose.position)
-        
         if self.robot_state == RobotState.GO_TO_MARKER or self.robot_state == RobotState.COMING_BACK:
             for marker in msg.markers:
                 if marker.marker_id == self.marker_id_goal:
                     self.distance_from_marker = marker.pose.position.z
                     break
 
-    def odometry_callback(self, msg):        
-        sin_yaw = 2 * (msg.pose.pose.orientation.w * msg.pose.pose.orientation.z + msg.pose.pose.orientation.x * msg.pose.pose.orientation.y)
-        cos_yaw = 1 - 2 * (msg.pose.pose.orientation.y * msg.pose.pose.orientation.y + msg.pose.pose.orientation.z * msg.pose.pose.orientation.z)
-        self.yaw = round(3.14 + math.atan2(sin_yaw, cos_yaw),2)
+    def odometry_callback(self, msg):
+        q = msg.pose.pose.orientation        
+        sin_yaw = 2 * (q.w * q.z + q.x * q.y)
+        cos_yaw = 1 - 2 * (q.y * q.y + q.z * q.z)
+        self.yaw =  math.pi + math.atan2(sin_yaw, cos_yaw)
         self.robot_position = msg.pose.pose.position
-        #self.get_logger().info(f'yaw: {yaw}')
 
 class RobotState(Enum):
     STARTING  = 1 # starting state
