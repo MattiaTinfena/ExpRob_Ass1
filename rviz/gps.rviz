@@ -88,7 +88,12 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        left_wheel:
+        left_front_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_rear_wheel:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -97,7 +102,7 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        right_wheel:
+        right_front_wheel:
           Alpha: 1
           Show Axes: false
           Show Trail: false

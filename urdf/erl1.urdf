@@ -76,16 +76,16 @@
   </link>
 
   <!-- STEP 3 - Wheels -->
-  <joint type="continuous" name="left_wheel_joint">
-    <origin xyz="0 0.15 0" rpy="0 0 0"/>
-    <child link="left_wheel"/>
+  <joint type="continuous" name="left_front_wheel_joint">
+    <origin xyz="0.15 0.15 0" rpy="0 0 0"/>
+    <child link="left_front_wheel"/>
     <parent link="base_link"/>
     <axis xyz="0 1 0" rpy="0 0 0"/>
     <limit effort="100" velocity="10"/>
     <dynamics damping="1.0" friction="1.0"/>
   </joint>
 
-  <link name='left_wheel'>
+  <link name='left_front_wheel'>
     <inertial>
       <mass value="5.0"/>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
@@ -103,7 +103,7 @@
       </geometry>
     </collision>
 
-    <visual name='left_wheel_visual'>
+    <visual name='left_front_wheel_visual'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
       <geometry>
         <mesh filename = "package://erl1/meshes/wheel.dae"/>
@@ -111,16 +111,16 @@
     </visual>
   </link>
 
-  <joint type="continuous" name="right_wheel_joint">
-    <origin xyz="0 -0.15 0" rpy="0 0 0"/>
-    <child link="right_wheel"/>
+  <joint type="continuous" name="right_front_wheel_joint">
+    <origin xyz="0.15 -0.15 0" rpy="0 0 0"/>
+    <child link="right_front_wheel"/>
     <parent link="base_link"/>
     <axis xyz="0 1 0" rpy="0 0 0"/>
     <limit effort="100" velocity="10"/>
     <dynamics damping="1.0" friction="1.0"/>
   </joint>
 
-  <link name='right_wheel'>
+  <link name='right_front_wheel'>
     <inertial>
       <mass value="5.0"/>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
@@ -138,7 +138,78 @@
       </geometry>
     </collision>
 
-    <visual name='right_wheel_visual'>
+    <visual name='right_front_wheel_visual'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <geometry>
+        <mesh filename = "package://erl1/meshes/wheel.dae"/>
+      </geometry>
+    </visual>
+  </link>
+
+
+  <joint type="continuous" name="left_rear_wheel_joint">
+    <origin xyz="-0.15 0.15 0" rpy="0 0 0"/>
+    <child link="left_rear_wheel"/>
+    <parent link="base_link"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+    <limit effort="100" velocity="10"/>
+    <dynamics damping="1.0" friction="1.0"/>
+  </joint>
+
+  <link name='left_rear_wheel'>
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <inertia
+          ixx="0.014" ixy="0" ixz="0"
+          iyy="0.014" iyz="0"
+          izz="0.025"
+      />
+    </inertial>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/> 
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+    </collision>
+
+    <visual name='left_rear_wheel_visual'>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <geometry>
+        <mesh filename = "package://erl1/meshes/wheel.dae"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint type="continuous" name="right_rear_wheel_joint">
+    <origin xyz="-0.15 -0.15 0" rpy="0 0 0"/>
+    <child link="right_rear_wheel"/>
+    <parent link="base_link"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>
+    <limit effort="100" velocity="10"/>
+    <dynamics damping="1.0" friction="1.0"/>
+  </joint>
+
+  <link name='right_rear_wheel'>
+    <inertial>
+      <mass value="5.0"/>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
+      <inertia
+          ixx="0.014" ixy="0" ixz="0"
+          iyy="0.014" iyz="0"
+          izz="0.025"
+      />
+    </inertial>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/> 
+      <geometry>
+        <cylinder radius=".1" length=".05"/>
+      </geometry>
+    </collision>
+
+    <visual name='right_rear_wheel_visual'>
       <origin xyz="0 0 0" rpy="0 1.5707 1.5707"/>
       <geometry>
         <mesh filename = "package://erl1/meshes/wheel.dae"/>
@@ -147,7 +218,7 @@
   </link>
 
   <!-- STEP 6 - Gazebo frictions and colors -->
-  <gazebo reference="left_wheel">
+  <gazebo reference="left_front_wheel">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <kp>1000000.0</kp>
@@ -156,7 +227,25 @@
     <maxVel>1.0</maxVel>
   </gazebo>
 
-  <gazebo reference="right_wheel">
+  <gazebo reference="right_front_wheel">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.0001</minDepth>
+    <maxVel>1.0</maxVel>
+  </gazebo>
+
+  <gazebo reference="left_rear_wheel">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <minDepth>0.0001</minDepth>
+    <maxVel>1.0</maxVel>
+  </gazebo>
+
+  <gazebo reference="right_rear_wheel">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <kp>1000000.0</kp>
