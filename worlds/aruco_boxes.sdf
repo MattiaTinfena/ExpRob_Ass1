@@ -78,27 +78,27 @@
       <self_collide>false</self_collide>
     </model>
     <include>
-      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <uri>file:///home/ubuntu/gazebo_models/aruco_box</uri>
       <name>aruco_box</name>
       <pose>2.5510902870585674 -0.29631083984035822 0.24999958194673308 3.141590998525531 -3.8930981531813808e-13 -3.1379500778123131</pose>
     </include>
     <include>
-      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <uri>file:///home/ubuntu/gazebo_models/aruco_box</uri>
       <name>aruco_box_0</name>
       <pose>0.88209846567909511 0.44909273158362589 0.24999988800065173 0.31363768537990122 1.5707962537944136 0.77353189305266257</pose>
     </include>
     <include>
-      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <uri>file:///home/ubuntu/gazebo_models/aruco_box</uri>
       <name>aruco_box_1</name>
       <pose>0.83557635545730591 2.0431859493255615 0.24999902140451172 -5.629719086594106e-18 4.4534178177335164e-17 -0.388061009191916</pose>
     </include>
     <include>
-      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <uri>file:///home/ubuntu/gazebo_models/aruco_box</uri>
       <name>aruco_box_2</name>
       <pose>2.5537241077409694 3.1884746979150611 0.24999937608785852 1.5707988052943616 -4.3753889400477419e-13 -3.1321432850206068</pose>
     </include>
     <include>
-      <uri>file:///home/obe/gazebo_models/aruco_box</uri>
+      <uri>file:///home/ubuntu/gazebo_models/aruco_box</uri>
       <name>aruco_box_3</name>
       <pose>4.4337043762207031 1.4977600574493408 0.24999999991468014 1.1456595028680099e-17 9.4276376414028504e-18 1.1177042943470204e-20</pose>
     </include>

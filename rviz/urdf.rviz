@@ -52,7 +52,7 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
-      Description File: /home/obe/my_ros2/src/erl1/urdf/erl1.urdf
+      Description File: /home/ubuntu/my_ros2/src/erl1/urdf/erl1.urdf
       Description Source: File
       Description Topic:
         Depth: 5
