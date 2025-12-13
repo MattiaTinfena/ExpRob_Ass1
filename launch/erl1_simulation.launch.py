@@ -2,7 +2,7 @@ import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.launch_description_sources import PythonLaunchDescriptionSource, FrontendLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command, TextSubstitution
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -11,6 +11,7 @@ def generate_launch_description():
 
     pkg_erl1 = get_package_share_directory('erl1')
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
+    pkg_aruco = get_package_share_directory('aruco_opencv')
 
     # Add your own gazebo library path here
     gazebo_models_path, ignore_last_dir = os.path.split(pkg_erl1)
@@ -77,6 +78,12 @@ def generate_launch_description():
         'on_exit_shutdown': 'true'}.items()
     )
 
+    aruco_launch = IncludeLaunchDescription(
+        FrontendLaunchDescriptionSource(
+            PathJoinSubstitution([pkg_aruco, 'launch', 'aruco_tracker.launch.xml'])
+        ),
+    )
+
     # Launch rviz
     rviz_node = Node(
         package='rviz2',
@@ -86,6 +93,12 @@ def generate_launch_description():
         parameters=[
             {'use_sim_time': LaunchConfiguration('use_sim_time')},
         ]
+    )
+
+    #launch Assignment node
+    ass_node = Node(
+        package='erl1',
+        executable='assignment1.py',
     )
 
     # Spawn the URDF model using the `/world/<world_name>/create` service
@@ -182,5 +195,7 @@ def generate_launch_description():
     launchDescriptionObject.add_action(robot_state_publisher_node)
     launchDescriptionObject.add_action(ekf_node)
     launchDescriptionObject.add_action(gz_image_bridge_node)
+    launchDescriptionObject.add_action(aruco_launch)
+    launchDescriptionObject.add_action(ass_node)
 
     return launchDescriptionObject
