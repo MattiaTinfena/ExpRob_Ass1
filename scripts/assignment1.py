@@ -89,7 +89,7 @@ class RobotControl(Node):
                 self.initial_yaw = current_yaw
                 self.get_logger().info(f'started moving with yaw {current_yaw}')
             
-                self.velocity_publisher.publish(self.rotating_counterclock_velocity)
+            self.velocity_publisher.publish(self.rotating_counterclock_velocity)
 
             if not self.orientation_goal_reached(self.initial_yaw):
                 self.robot_state = RobotState.SEARCH_FOR_MARKERS
@@ -106,6 +106,9 @@ class RobotControl(Node):
                 for marker_id, marker in self.markers_detected.items():
                     self.get_logger().info(f'marker id:{marker_id}, error: {marker[1]}, yaw: {marker[0]}')
                 self.robot_state = RobotState.SET_MARKER_GOAL
+            else:
+                self.velocity_publisher.publish(self.rotating_counterclock_velocity)
+
 
         elif self.robot_state == RobotState.SET_MARKER_GOAL:
             if len(self.unvisited_markers) != 0:
