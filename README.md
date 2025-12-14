@@ -1,35 +1,71 @@
-# Experimental Laboratory Classes
+# Experimental robotics laboratory Assignment 1
 
-- This repo contains the package `erl1`
+This is the submission for the first assignment of the Experimental robotics laboratory.
 
-- When it comes to the simulation with the MOGI robot, it is necessary to have also the package you find at the following link: `https://github.com/CarmineD8/erl1_sensors`
+As you can see from the videos the robot is spawned inside of a circle of aruco markers. The robot first does a complete turn to collect all the trackers and visits all of them in order of ascending id value.
 
-- The folder `meshes` il cloned from `https://github.com/CarmineD8/meshes`
+This simulation has been realized with ROS2 Jazzy, Gazebo for the simulation enviroment and the auruco_opencv library for the simulation environment
 
-- When gps is integrated, to see the robot moving you can run the command  
-`python3 gps_follower.py`   
-in the folder `erl1_sensors`, obtained by cloning the repo previously linked
+## Environment setup
 
-- When `lidar` is added, you need to subscribe (in the file spawn_robot.launch.py) to the bridge of the erl1_sensors pkg this two topics:  
-`"/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan",`
-`"/scan/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",`
+Be sure to use ROS2 Jazzy to ensure compatibility
 
-- When substituting the camera with a rgbd one, you need to remove the subscription (in the file spawn_robot.launch.py) to the bridge of the erl1_sensors pkg this two topics:
-`"/camera/image@sensor_msgs/msg/Image@gz.msgs.Image",`
-`"/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",`  
-and then add these two new ones:  
-`"/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",`
-`"/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",`
+1. clone the package in a ros src folder
+2. clone the aruco_opencv package in the same ros folder
+    ```bash
+    git clone https://github.com/fictionlab/ros_aruco_opencv.git
+    ```
+3. create the python environment in the ros folder:
+    ```bash
+    python3 -m venv venv
+    ```
+3. tell colcon to not build the venv folder
+    ```bash
+    touch PUT_FILE_HERE
+    ```
+4. source the venv
+    ```bash
+    source venv/bin/activate
+    ```
+5. install python packages
+    ```bash
+    pip install -r requirements.txt
+    ```
+6. build the ros packages with colcon
+    ```bash
+    colcon build
+    ```
+## Run the launchfile for the simulation
 
-- To use open_cv, the repo `https://github.com/CarmineD8/my_opencv` should be cloned as another pkg of the workspace.
-The repo for open_cv in python is instead `https://github.com/CarmineD8/my_opencv_py`
+Be sure to have sourced the local_setup:
 
-- For using aruco_open_cv, I tuned back from a rgbd camera to a normal one. NB: The camera must not be wide angle!  
-It is also necessary to clone this repo `https://github.com/SaxionMechatronics/ros2-gazebo-aruco` as a new folder at the same level of `my_ros2` workspace, and the repo `https://github.com/fictionlab/ros_aruco_opencv` as a pkg in `my_ros2`.  
-Then, after starting the simulation   
-(   `colcon build` in the workspace  
-    `source install/local_setup.bashrc`  
-    `ros2 launch bme_gazebo_sensors spawn_robot.launch.py`)  
-in another terminal run  
-`ros2 launch aruco_opencv aruco_tracker.launch.xml`  
-In this way, in the rviz environment, when clicking `Add -> By Topic`, the option `Image` under `/debugging` should be appeared, and it will show the box with the calibration mark with an axes frame.
+```bash
+source ./install/bin/local_setup
+```
+You can now launch the simulation with the provided launch file
+
+```bash
+ros2 launch erl1 erl1_simulation.launch.py
+```
+
+## Optional parts
+
+#### Skid steering
+
+To test the bot with 4 wheels in skid steering switch to the skid-steering branch
+
+```bash
+git switch skid-steering
+```
+
+rebuild with colcon and relaunch the file
+
+### ROSBots (currently not tested)
+
+To test the code with the rosbot switch to the Lab branch 
+
+```bash
+git switch skid-steering
+```
+rebuild with colcon and relaunch the file
+
