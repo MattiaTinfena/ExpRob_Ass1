@@ -14,24 +14,12 @@ Be sure to use ROS2 Jazzy to ensure compatibility
 2. clone the aruco_opencv package in the same ros folder
     ```bash
     git clone https://github.com/fictionlab/ros_aruco_opencv.git
-    ```
-3. create the python environment in the ros folder:
+3. be sure that aruco is using the correct topics and uses the correct dictionary (ARUCO_ORIGINAL)
+4. copy the aruco box generated on the `gazebo_models` folder
     ```bash
-    python3 -m venv venv
+     cp aruco_box/ ~/gazebo_models/ -r
     ```
-3. tell colcon to not build the venv folder
-    ```bash
-    touch PUT_FILE_HERE
-    ```
-4. source the venv
-    ```bash
-    source venv/bin/activate
-    ```
-5. install python packages
-    ```bash
-    pip install -r requirements.txt
-    ```
-6. build the ros packages with colcon
+4. build the ros packages with colcon
     ```bash
     colcon build
     ```
