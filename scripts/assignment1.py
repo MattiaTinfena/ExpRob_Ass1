@@ -9,7 +9,6 @@ from enum import Enum
 from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
 import cv2
-import transforms3d
 
 class RobotControl(Node):
     def __init__(self):
@@ -21,13 +20,14 @@ class RobotControl(Node):
         self.error_px_delta = 5
         self.dist_treshold = 0.25
         self.dist_home_treshold = 0.05
-        self.yaw = None
-        self.initial_yaw = None
+        self.initial_marker = None
         self.rotation_goal = None
         self.marker_id_goal = None
         self.goal_marker_error = float("inf")
         self.distance_from_marker = None
         self.image_published = False
+        self.detecting_first_marker = False
+        self.first_marker_id = None
 
         self.robot_state = RobotState.STARTING
         self.markers_detected = dict()
@@ -54,44 +54,29 @@ class RobotControl(Node):
 
         self.timer = self.create_timer(0.007, self.control_robot)
 
-        self.rotating_counterclock_velocity = Twist()
-        self.rotating_clock_velocity = Twist()
+        self.rotating_velocity = Twist()
         self.stop_movement = Twist()
         self.go_to_marker_velocity = Twist()
         self.go_home_velocity = Twist()
         self.robot_position = Point()
-        self.current_rotation_velocity = Twist()
-
-        self.rotating_counterclock_velocity.angular.z = 0.3
-        self.rotating_clock_velocity.angular.z = -0.3
+        self.rotating_velocity.angular.z = 0.3
 
         self.go_to_marker_velocity.linear.x = 0.3
         self.go_home_velocity.linear.x = -0.3
-        
-    def orientation_goal_reached(self, goal):
-        return ((goal  + self.delta) % (math.pi * 2)) > self.yaw and ((goal  - self.delta) % (math.pi * 2)) < self.yaw
     
     def oriented_to_marker(self):
         return self.goal_marker_error < self.error_px_delta
     
     def control_robot(self):
-        current_yaw = self.yaw
         
-        if self.robot_state == RobotState.STARTING:
-            if current_yaw is None:
-                return
-            
-            if self.initial_yaw is None:
-                self.initial_yaw = current_yaw
-                self.get_logger().info(f'started')
-            
-            self.velocity_publisher.publish(self.rotating_counterclock_velocity)
-
-            if not self.orientation_goal_reached(self.initial_yaw):
+        if self.robot_state == RobotState.STARTING:            
+            self.velocity_publisher.publish(self.rotating_velocity)
+            if self.first_marker_id is not None and not self.detecting_first_marker:
                 self.robot_state = RobotState.SEARCH_FOR_MARKERS
+                self.get_logger().info("started")
 
         elif self.robot_state == RobotState.SEARCH_FOR_MARKERS:
-            if self.orientation_goal_reached(self.initial_yaw):
+            if self.detecting_first_marker:
                 self.velocity_publisher.publish(self.stop_movement)
                 self.get_logger().info('stopped')
 
@@ -99,19 +84,13 @@ class RobotControl(Node):
                 self.unvisited_markers.sort(reverse = True)
                 self.robot_state = RobotState.SET_MARKER_GOAL
             else:
-                self.velocity_publisher.publish(self.rotating_counterclock_velocity)
+                self.velocity_publisher.publish(self.rotating_velocity)
 
 
         elif self.robot_state == RobotState.SET_MARKER_GOAL:
             if len(self.unvisited_markers) != 0:
                 self.marker_id_goal = self.unvisited_markers.pop()
                 self.get_logger().info(f'current marker id goal: {self.marker_id_goal}')
-
-                self.rotation_goal = self.markers_detected[self.marker_id_goal][0]   
-                if (self.rotation_goal - current_yaw) % (math.pi * 2) > math.pi:
-                    self.current_rotation_velocity = self.rotating_clock_velocity
-                else: 
-                    self.current_rotation_velocity = self.rotating_counterclock_velocity
                 
                 self.robot_state = RobotState.ROTATE_TO_MARKER
             else:
@@ -120,7 +99,7 @@ class RobotControl(Node):
         
         elif self.robot_state == RobotState.ROTATE_TO_MARKER:
             if not self.oriented_to_marker():
-                self.velocity_publisher.publish(self.current_rotation_velocity) 
+                self.velocity_publisher.publish(self.rotating_velocity) 
             else:
                 self.velocity_publisher.publish(self.stop_movement)
                 self.robot_state = RobotState.GO_TO_MARKER
@@ -149,21 +128,31 @@ class RobotControl(Node):
                 self.robot_state = RobotState.SET_MARKER_GOAL
 
     def image_callback(self, msg):
-        current_yaw = self.yaw
+        detecting_first_marker = False
         cv_image = self.bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
         if self.robot_state != RobotState.SEARCH_FOR_MARKERS and self.robot_state != RobotState.ACQUIRE_IMAGE \
-            and self.robot_state!= RobotState.ROTATE_TO_MARKER:
+            and self.robot_state!= RobotState.ROTATE_TO_MARKER and self.robot_state != RobotState.STARTING:
+            self.detecting_first_marker = False
             return
         
         img_gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
         aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_ARUCO_ORIGINAL)
         corners, ids, _ = cv2.aruco.detectMarkers(img_gray, aruco_dict)
-        if ids is None: 
+        if ids is None:
+            self.detecting_first_marker = False
             return
-                
+    
+        if len(self.markers_detected) == 0:
+            self.first_marker_id = ids[0][0]
+            self.get_logger().info("detected first marker")
+
         for i in range(len(ids)):
             id = ids[i][0]
+
+            if id == self.first_marker_id:
+                detecting_first_marker = True
+
             x_center = 0
             y_center = 0
 
@@ -196,8 +185,10 @@ class RobotControl(Node):
                 self.goal_marker_error = float("inf")
 
             if id not in self.markers_detected or \
-                x_error < self.markers_detected[id][1]:
-                self.markers_detected[id] = (current_yaw, x_error)
+                x_error < self.markers_detected[id]:
+                self.markers_detected[id] = x_error
+        self.detecting_first_marker = detecting_first_marker
+
     
     def detections_callback(self, msg):
         if self.robot_state == RobotState.GO_TO_MARKER or self.robot_state == RobotState.COMING_BACK:
@@ -207,9 +198,6 @@ class RobotControl(Node):
                     break
 
     def odometry_callback(self, msg):
-        q = msg.pose.pose.orientation  
-        euler_angles = transforms3d.euler.quat2euler([q.w, q.x, q.y, q.z])      
-        self.yaw = math.pi + euler_angles[2]
         self.robot_position = msg.pose.pose.position
 class RobotState(Enum):
     STARTING  = 1
