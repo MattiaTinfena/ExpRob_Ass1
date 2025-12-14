@@ -1,7 +1,7 @@
 # Experimental robotics laboratory Assignment 1
 
 Made by:
-- [Elisa Martinenghi mat:6504193](https://github.com/mrtelisa)
+- [Elisa Martinenghi mat: 6504193](https://github.com/mrtelisa)
 - [Mattia Tinfena mat: 7852527](https://github.com/MattiaTinfena)
 - [Roberto Bertelli mat: 7289118](https://github.com/obesk)
 
@@ -10,6 +10,15 @@ This is the submission for the first assignment of the Experimental robotics lab
 As you can see from the videos the robot is spawned inside of a circle of aruco markers. The robot first does a complete turn to collect all the trackers and visits all of them in order of ascending id value.
 
 This simulation has been realized with ROS2 Jazzy, Gazebo for the simulation enviroment and the auruco_opencv library for the simulation environment
+
+
+### 2 Wheels driving
+
+![2 wheels](./gifs/2wheel.gif)
+
+### 4 wheels driving
+![4 wheels](gifs/4wheel.gif)
+
 
 ## Environment setup
 
