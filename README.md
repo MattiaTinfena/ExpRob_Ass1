@@ -1,5 +1,10 @@
 # Experimental robotics laboratory Assignment 1
 
+Made by:
+- [Elisa Martinenghi mat:6504193](https://github.com/mrtelisa)
+- [Mattia Tinfena mat: 7852527](https://github.com/MattiaTinfena)
+- [Roberto Bertelli mat: 7289118](https://github.com/obesk)
+
 This is the submission for the first assignment of the Experimental robotics laboratory.
 
 As you can see from the videos the robot is spawned inside of a circle of aruco markers. The robot first does a complete turn to collect all the trackers and visits all of them in order of ascending id value.
@@ -49,6 +54,9 @@ git switch skid-steering
 rebuild with colcon and relaunch the file
 
 ### ROSBots (currently not tested)
+
+Warning: we were not able to test on the lab for now, so this feature needs 
+to be still fully implemente
 
 To test the code with the rosbot switch to the Lab branch 
 
