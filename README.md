@@ -24,7 +24,10 @@ This simulation has been realized with ROS2 Jazzy, Gazebo for the simulation env
 
 Be sure to use ROS2 Jazzy to ensure compatibility
 
-1. clone the package in a ros src folder
+1. clone the package in a ros src folder, be sure to name it `erl1`
+    ```bash
+    git clone https://github.com/MattiaTinfena/ExpRob_Ass1 erl1
+    ```
 2. clone the aruco_opencv package in the same ros folder
     ```bash
     git clone https://github.com/fictionlab/ros_aruco_opencv.git
