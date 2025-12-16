@@ -70,13 +70,21 @@ rebuild with colcon and relaunch the file
 
 ### ROSBots (currently not tested)
 
-Warning: we were not able to test on the lab for now, so this feature needs 
-to be still fully implemente
-
 To test the code with the rosbot switch to the Lab branch 
 
 ```bash
-git switch skid-steering
+git switch Lab
 ```
-rebuild with colcon and relaunch the file
+launch the auruco detections (be sure that aruco subscribes to the correct topics)
+
+```bash
+ros2 launch aruco_opencv aruco_tracker.launch.xml
+```
+
+launch the robot script
+
+```bash
+ros2 run erl1 assignment1.py 
+```
+
 
