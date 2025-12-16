@@ -19,6 +19,9 @@ This simulation has been realized with ROS2 Jazzy, Gazebo for the simulation env
 ### 4 wheels driving
 ![4 wheels](gifs/4wheel.gif)
 
+### Real robot test in lab
+
+![lab](./gifs/lab.gif)
 
 ## Environment setup
 
