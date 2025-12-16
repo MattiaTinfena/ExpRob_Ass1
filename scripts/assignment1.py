@@ -20,6 +20,7 @@ class RobotControl(Node):
         self.error_px_delta = 5
         self.dist_treshold = 0.25
         self.dist_home_treshold = 0.05
+        self.home_pose = Point()
         self.initial_marker = None
         self.rotation_goal = None
         self.marker_id_goal = None
@@ -102,6 +103,7 @@ class RobotControl(Node):
                 self.velocity_publisher.publish(self.rotating_velocity) 
             else:
                 self.velocity_publisher.publish(self.stop_movement)
+                self.home_pose = self.robot_position
                 self.robot_state = RobotState.GO_TO_MARKER
         
         elif self.robot_state == RobotState.GO_TO_MARKER:
@@ -122,7 +124,7 @@ class RobotControl(Node):
 
         elif self.robot_state == RobotState.COMING_BACK:
             self.velocity_publisher.publish(self.go_home_velocity)
-            if math.sqrt(self.robot_position.x**2 + self.robot_position.y**2) < self.dist_home_treshold:
+            if math.sqrt((self.robot_position.x - self. home_pose.x)**2 + (self.robot_position.y - self.home_pose.y)**2) < self.dist_home_treshold:
                 self.velocity_publisher.publish(self.stop_movement)
                 self.get_logger().info('home reached')
                 self.robot_state = RobotState.SET_MARKER_GOAL
@@ -149,7 +151,8 @@ class RobotControl(Node):
 
         for i in range(len(ids)):
             id = ids[i][0]
-
+            if id == 0:
+                continue
             if id == self.first_marker_id:
                 detecting_first_marker = True
 
