@@ -9,7 +9,7 @@ This is the submission for the first assignment of the Experimental robotics lab
 
 As you can see from the videos the robot is spawned inside of a circle of aruco markers. The robot first does a complete turn to collect all the trackers and visits all of them in order of ascending id value.
 
-This simulation has been realized with ROS2 Jazzy, Gazebo for the simulation enviroment and the auruco_opencv library for the simulation environment
+This simulation has been realized with ROS2 Jazzy, Gazebo sim for the simulation enviroment and the auruco_opencv library for the simulation environment
 
 
 ### 2 Wheels driving
@@ -34,6 +34,7 @@ Be sure to use ROS2 Jazzy to ensure compatibility
 2. clone the aruco_opencv package in the same ros folder
     ```bash
     git clone https://github.com/fictionlab/ros_aruco_opencv.git
+    ```
 3. be sure that aruco is using the correct topics and uses the correct dictionary (ARUCO_ORIGINAL)
 4. copy the aruco box generated on the `gazebo_models` folder
     ```bash
@@ -68,18 +69,20 @@ git switch skid-steering
 
 rebuild with colcon and relaunch the file
 
-### ROSBots (currently not tested)
+### ROSBots
 
 To test the code with the rosbot switch to the Lab branch 
 
 ```bash
 git switch Lab
 ```
-launch the auruco detections (be sure that aruco subscribes to the correct topics)
+launch the auruco detections
 
 ```bash
 ros2 launch aruco_opencv aruco_tracker.launch.xml
 ```
+
+In `aruco_opencv/config/aruco_tracker.yaml` change the `cam_base_topic:` to: `camera/rgb/image_raw/` and set `image_sub_compressed:` to `true`
 
 launch the robot script
 
